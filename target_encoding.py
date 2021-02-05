@@ -36,7 +36,7 @@ def main():
         ("features", ColumnTransformer([
             ("target_enc", ce.TargetEncoder(cols=["reviewerID", "asin"]), ["reviewerID","asin"]),
         ])),
-        ("model", SGDClassifier(verbose=True))
+        ("model", SGDClassifier(loss='modified_huber'))
          ])
 
     # model = ce.TargetEncoder(cols=["reviewerID"])
@@ -53,15 +53,12 @@ def main():
 
 def test():
     df = pd.read_csv(sys.argv[1])
-    with open("models/baseline.pickle", "rb") as file:
+    with open("models/target_encoding.pickle", "rb") as file:
         model = pickle.load(file)
 
-    predictions = model.predict(df)
-    print(df.shape)
-    print(predictions)
-    print("ACC", np.mean(df["score"] == predictions))
-    print("L1", np.mean(np.abs(df["score"] - predictions)))
+    predictions = model.predict_proba(df)
     plot_confusion_matrx(predictions, df["score"])
+
 
 if __name__ == "__main__":
     if len(sys.argv) == 2:

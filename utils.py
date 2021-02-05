@@ -49,10 +49,15 @@ def create_datasets():
     df_eval.to_csv("data/eval_under.csv", index=None)
 
 
-def plot_confusion_matrx(pred, targ):
+def plot_confusion_matrx(pred_prob, targ):
+    pred = np.argmax(pred_prob, -1)+1
+
+    print("ACC", np.mean(targ == pred))
+    print("L1", np.mean(np.abs(targ - pred)))
+    print("E[L1]", np.mean(np.abs(targ - pred_prob.dot([1,2,3,4,5]))))
     cm = metrics.confusion_matrix(targ, pred, labels=[1,2,3,4,5])
     cm = cm/np.sum(cm)
-    sns.heatmap(cm, linewidth=0.5,  annot=True)
+    sns.heatmap(cm, linewidth=0.5,  annot=True, xticklabels=[1,2,3,4,5], yticklabels=[1,2,3,4,5])
     plt.show()
 
 def clean_text(text):

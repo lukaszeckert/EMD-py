@@ -32,10 +32,7 @@ def test():
     df = pd.read_csv(sys.argv[1])
     with open("models/baseline.pickle", "rb") as file:
         model = pickle.load(file)
-    predictions = model.predict(df)
-
-    print("ACC", np.mean(df["score"] == predictions))
-    print("L1", np.mean(np.abs(df["score"] - predictions)))
+    predictions = model.predict_proba(df)
     plot_confusion_matrx(predictions, df["score"])
 
 if __name__ == "__main__":
@@ -43,3 +40,4 @@ if __name__ == "__main__":
         test()
     else:
         main()
+        test()

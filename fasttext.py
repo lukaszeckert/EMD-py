@@ -88,7 +88,7 @@ def build_model(load=False):
     # load the dataset in json format
     train_ds, = data.TabularDataset.splits(
        path = 'data',
-       train = 'train_under.csv',
+       train = 'train.csv',
        format = 'csv',
        fields = fields,
        skip_header = True
@@ -135,14 +135,14 @@ def train_model():
     # load the dataset in json format
     train_ds, = data.TabularDataset.splits(
        path = 'data',
-       train = 'train_under.csv',
+       train = 'train.csv',
        format = 'csv',
        fields = fields,
        skip_header = True
         )
     valid_ds, =  data.TabularDataset.splits(
        path = 'data',
-       validation = 'eval_under.csv',
+       validation = 'eval.csv',
        format = 'csv',
        fields = fields,
        skip_header = True
@@ -162,7 +162,7 @@ def train_model():
 
     model.to(device)
 
-    for i in range(100):
+    for i in range(10):
         train_loss, train_acc = train(model, train_iterator, optimizer, loss_function)
         eval_loss, eval_acc, l1_loss = evaluate(model, valid_iterator, loss_function)
         print(f"Epoch {i}, Train acc: {train_acc}, Train loss: {train_loss}, Eval acc {eval_acc}, Eval loss {eval_loss}, L1 loss: {l1_loss}")
@@ -189,14 +189,13 @@ def test():
 
     targets = []
     for batch in ds_iterator:
-        p = model(batch.reviewText)
+        p = torch.exp(model(batch.reviewText)) #LogSoftmax
 
-        p = p.argmax(-1).detach().cpu().numpy()
-        predictions.extend(p)
+        #p = p.argmax(-1).detach().cpu().numpy()
+        predictions.extend(p.detach().cpu().numpy())
         targets.extend(batch.score.cpu().numpy())
-
-    print("ACC", np.mean(np.array(predictions) == np.array(targets)))
-    print("L1", np.mean(np.abs(np.array(predictions) - np.array(targets))))
+    predictions = np.array(predictions)
+    predictions = predictions[:,1:]
     plot_confusion_matrx(predictions, targets)
 
 if __name__ == "__main__":
